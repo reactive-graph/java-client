@@ -1,0 +1,68 @@
+import com.graphql_java_generator.customscalars.GraphQLScalarTypeString
+
+// The GraphQL plugin is compiled with Spring Boot 2.7.
+// If you want to use it with Spring Boot 3.x, you have to update these dependencies, like this buildscript block:
+buildscript {
+    repositories {
+        // The GraphQL plugin depends on libraries that are available with maven
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-starter-graphql:3.3.3"
+    }
+}
+
+plugins {
+    id "java"
+    id "io.freefair.lombok"
+    id "org.springframework.boot" version "3.3.3"
+    id "com.graphql-java-generator.graphql-gradle-plugin3" version "2.7"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.springframework.boot:spring-boot"
+    // THE VERSION MUST BE THE SAME AS THE PLUGIN's ONE
+    implementation "com.graphql-java-generator:graphql-java-client-runtime:2.7"
+}
+
+sourceSets.main {
+    java {
+        srcDirs("/build/generated/sources/graphqlGradlePlugin")
+    }
+    resources {
+        srcDirs("/build/generated/resources/graphqlGradlePlugin")
+    }
+}
+
+generateClientCode {
+    dependsOn("generateEffectiveLombokConfig")
+}
+
+generateClientCodeConf {
+
+    packageName = "io.reactive.graph"
+    customScalars = [[
+                             graphQLTypeName             : "Date",
+                             javaType                    : "java.util.Date",
+                             graphQLScalarTypeStaticField: "com.graphql_java_generator.customscalars.GraphQLScalarTypeDate.Date"
+                     ], [
+                             graphQLTypeName             : "UUID",
+                             javaType                    : "java.lang.String",
+                             graphQLScalarTypeStaticField: "com.graphql_java_generator.customscalars.GraphQLScalarTypeString.String"
+                     ], [
+                             graphQLTypeName             : "JSON",
+                             javaType                    : "java.lang.String",
+                             graphQLScalarTypeStaticField: "com.graphql_java_generator.customscalars.GraphQLScalarTypeString.String"
+                     ]]
+
+    // The parameters below are mandatory for 2.0RC1. These parameters will disappear in 2.0, and these values will be forced
+    copyRuntimeSources = false
+    generateDeprecatedRequestResponse = false
+    separateUtilityClasses = true
+}

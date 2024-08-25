@@ -1,36 +1,58 @@
 package io.reactive.graph.client.example;
 
+import com.graphql_java_generator.client.GraphqlClientUtils;
+import com.graphql_java_generator.client.graphqlrepository.EnableGraphQLRepositories;
+import io.reactive.graph.EntityType;
+import io.reactive.graph.util.QueryExecutor;
+import io.reactive.graph.repository.EntityTypeRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-import java.util.Arrays;
+import java.util.List;
 
-@SpringBootApplication
+@SpringBootApplication(
+        scanBasePackageClasses = { ReactiveGraphClientExample.class, GraphqlClientUtils.class, QueryExecutor.class }
+)
+@EnableGraphQLRepositories({ "io.reactive.graph.repository" })
 @Slf4j
 public class ReactiveGraphClientExample {
 
     public static void main(String[] args) {
-        log.info("STARTING THE APPLICATION");
         SpringApplication.run(ReactiveGraphClientExample.class, args);
-        log.info("APPLICATION FINISHED");
     }
+
+    @Autowired
+    private EntityTypeRepository entityTypeRepository;
 
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
-
-            System.out.println("Let's inspect the beans provided by Spring Boot:");
-
-            String[] beanNames = ctx.getBeanDefinitionNames();
-            Arrays.sort(beanNames);
-            for (String beanName : beanNames) {
-                System.out.println(beanName);
+            try {
+                List<EntityType> entityTypes = entityTypeRepository.getAll().getTypes().getEntities();
+                for (EntityType entityType : entityTypes) {
+                    log.info("| {} | {} |", entityType.getNamespace(), entityType.getName());
+                }
+                SpringApplication.exit(ctx, new ExitCodeGenerator() {
+                    @Override
+                    public int getExitCode() {
+                        return 0;
+                    }
+                });
+            } catch (Exception e) {
+                log.error("{}", e.getMessage(), e);
+                SpringApplication.exit(ctx, new ExitCodeGenerator() {
+                    @Override
+                    public int getExitCode() {
+                        return 1;
+                    }
+                });
             }
-
         };
     }
 

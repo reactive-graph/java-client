@@ -15,9 +15,11 @@ java {
     }
 }
 
-
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
+    implementation("com.graphql-java-generator:graphql-java-client-runtime:2.7")
+    implementation(project(":reactive-graph-client"))
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
