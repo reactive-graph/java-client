@@ -1,5 +1,6 @@
 # Reactive Graph - Java Client
 
+> [!CAUTION]
 > Note: This is work in progress and not yet useful!
 
 ## About
